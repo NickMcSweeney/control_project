@@ -1,10 +1,13 @@
 <launch>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="worlds/gripper.world"/>
+    <arg name="world_name" value="default_gripper.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
     <arg name="recording" value="false"/>
     <arg name="debug" value="false"/>
   </include>
+  <node name="gripper_control_node" pkg="gripper_control" type="controller">
+    /*<param name="wall_distance" type="double" value="0.2" />*/
+  </node>
 </launch>

@@ -13,7 +13,7 @@
                     <iyz>0</iyz>
                     <izz>0.01</izz>
                 </inertia>
-                <mass>10.0</mass>
+                <mass>50.0</mass>
             </inertial>
             <collision name="collision">
                 <geometry>
