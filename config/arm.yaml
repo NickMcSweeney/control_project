@@ -1,0 +1,3 @@
+type: "position_controllers/JointPositionController"
+#pid: { p: 100, i: 0.01, d: 0.1 }
+joint: gripper_extension
