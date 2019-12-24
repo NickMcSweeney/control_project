@@ -66,7 +66,7 @@ class GripperController {
   }
 
   void setPosition() {
-    vector<double> new_pos = {0.0, 0.0};
+    vector<double> new_pos = {0.1, 0.1};
     std_msgs::Float64MultiArray msg;
 
     // set up dimensions
