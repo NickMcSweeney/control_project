@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <robot name="r2d2" xmlns:xacro="http://ros.org/wiki/xacro">
-
+  <plugin name="r2d2_arm" filename="libr2d2_arm.so"/>
+  
   <xacro:property name="width" value="0.2" />
   <xacro:property name="leglen" value="0.6" />
   <xacro:property name="polelen" value="0.2" />
@@ -275,9 +276,9 @@
 
   <!-- Gazebo plugin for ROS Control -->
   <gazebo>
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-      <robotNamespace>/</robotNamespace>
-    </plugin>
+    <!--<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">-->
+      <!--<robotNamespace>/</robotNamespace>-->
+    <!--</plugin>-->
   	<plugin name="r2d2_arm" filename="libr2d2_arm.so"/>
   </gazebo>
 

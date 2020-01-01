@@ -17,9 +17,6 @@
           r2d2_head_controller
           --shutdown-timeout 3"/>
 
-  <node pkg="r2d2" type="r2d2_arm"  name="r2d2_arm">
-    <param name="publish_frequency" type="double" value="30.0" />
-  </node>
 	<!--<node name="r2d2_arm" pkg="r2d2_arm" type="plugin"></node>-->
   <!--<node name="gripper_controller_node" pkg="r2d2" type="gripper_controller"></node>-->
 </launch>
