@@ -9,17 +9,30 @@ add_compile_options(-std=c++11)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+	rospy
   std_msgs
+	gazebo_msgs 
+  gazebo_plugins
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(gazebo REQUIRED)
+#find_package(Boost REQUIRED COMPONENTS thread)
+#find_package(Eigen3)
+#if(NOT EIGEN3_FOUND)
+	## Fallback to cmake_modules
+  #find_package(cmake_modules REQUIRED)
+  #find_package(Eigen REQUIRED)
+  #set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
+#else()
+	#set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+#endif()
 
-
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+catkin_package(
+	INCLUDE_DIRS include
+  CATKIN_DEPENDS roscpp rospy 
+  #DEPENDS Boost
+)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -45,33 +58,6 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
-
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
-
-## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
-
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
-
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
 ################################################
@@ -86,12 +72,6 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * uncomment the "generate_dynamic_reconfigure_options" section below
 ##     and list every .cfg file to be processed
 
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
-
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -101,11 +81,11 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
+
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES gripper_control
-#  CATKIN_DEPENDS roscpp std_msgs
-#  DEPENDS system_lib
+  INCLUDE_DIRS include
+  CATKIN_DEPENDS roscpp rospy 
+  #DEPENDS Boost
 )
 
 ###########
@@ -115,8 +95,11 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
+	#${Boost_INCLUDE_DIR}
+  #${EIGEN3_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
+  ${GAZEBO_INCLUDE_DIRS}          
 )
 
 ## Declare a C++ library
@@ -132,9 +115,12 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/gripper_control_node.cpp)
+
 add_executable(gripper_controller src/gripper_controller.cpp)
 target_link_libraries(gripper_controller ${catkin_LIBRARIES})
+
+#add_executable(gazebo_gripper_arm_controller src/gazebo_gripper_arm_controller.cpp)
+#target_link_libraries(gazebo_gripper_arm_controller ${catkin_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -192,6 +178,13 @@ target_link_libraries(gripper_controller ${catkin_LIBRARIES})
 #   # myfile2
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
+
+#install(TARGETS 
+	#gazebo_gripper_arm_controller
+	#ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+	#LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}                    
+	#RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}                       
+#)
 
 #############
 ## Testing ##

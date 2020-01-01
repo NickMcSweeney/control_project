@@ -151,7 +151,7 @@
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
     <joint name="gripper_extension">
-      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <hardwareInterface>EffortJointInterface</hardwareInterface>
     </joint>
   </transmission>
 
@@ -278,6 +278,7 @@
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/</robotNamespace>
     </plugin>
+  	<plugin name="r2d2_arm" filename="libr2d2_arm.so"/>
   </gazebo>
 
 </robot>

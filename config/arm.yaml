@@ -1,3 +1,2 @@
-type: "position_controllers/JointPositionController"
-#pid: { p: 100, i: 0.01, d: 0.1 }
+type: "r2d2_arm"
 joint: gripper_extension
