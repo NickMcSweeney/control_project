@@ -252,10 +252,10 @@
     </joint>
 
     <!--<gazebo>-->
-      <plugin name="simple_gripper" filename="libsimple_gripper.so">
-        <robotNamespace>/gripper/</robotNamespace>
-      </plugin>
-      <!--</gazebo>-->
+      <!--<plugin name="simple_gripper" filename="libsimple_gripper.so">-->
+        <!--<robotNamespace>/gripper/</robotNamespace>-->
+      <!--</plugin>-->
+    <!--</gazebo>-->
 
   </model>
 </sdf>

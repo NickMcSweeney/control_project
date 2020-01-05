@@ -57,38 +57,38 @@ include CMakeFiles/r2d2_arm.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/r2d2_arm.dir/flags.make
 
-CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o: CMakeFiles/r2d2_arm.dir/flags.make
-CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o: ../r2d2_arm_plugin.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/usernamix/Workspace/src/r2d2/plugins/r2d2_arm/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o -c /home/usernamix/Workspace/src/r2d2/plugins/r2d2_arm/r2d2_arm_plugin.cc
+CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o: CMakeFiles/r2d2_arm.dir/flags.make
+CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o: ../r2d2_arm_plugin.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/usernamix/Workspace/src/r2d2/plugins/r2d2_arm/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o -c /home/usernamix/Workspace/src/r2d2/plugins/r2d2_arm/r2d2_arm_plugin.cpp
 
-CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/usernamix/Workspace/src/r2d2/plugins/r2d2_arm/r2d2_arm_plugin.cc > CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.i
+CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/usernamix/Workspace/src/r2d2/plugins/r2d2_arm/r2d2_arm_plugin.cpp > CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.i
 
-CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/usernamix/Workspace/src/r2d2/plugins/r2d2_arm/r2d2_arm_plugin.cc -o CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.s
+CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/usernamix/Workspace/src/r2d2/plugins/r2d2_arm/r2d2_arm_plugin.cpp -o CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.s
 
-CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o.requires:
+CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o.requires:
 
-.PHONY : CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o.requires
+.PHONY : CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o.requires
 
-CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o.provides: CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o.requires
-	$(MAKE) -f CMakeFiles/r2d2_arm.dir/build.make CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o.provides.build
-.PHONY : CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o.provides
+CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o.provides: CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o.requires
+	$(MAKE) -f CMakeFiles/r2d2_arm.dir/build.make CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o.provides.build
+.PHONY : CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o.provides
 
-CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o.provides.build: CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o
+CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o.provides.build: CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o
 
 
 # Object files for target r2d2_arm
 r2d2_arm_OBJECTS = \
-"CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o"
+"CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o"
 
 # External object files for target r2d2_arm
 r2d2_arm_EXTERNAL_OBJECTS =
 
-libr2d2_arm.so: CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o
+libr2d2_arm.so: CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o
 libr2d2_arm.so: CMakeFiles/r2d2_arm.dir/build.make
 libr2d2_arm.so: /usr/lib/x86_64-linux-gnu/libSimTKsimbody.so
 libr2d2_arm.so: /usr/lib/x86_64-linux-gnu/libSimTKmath.so
@@ -245,7 +245,7 @@ CMakeFiles/r2d2_arm.dir/build: libr2d2_arm.so
 
 .PHONY : CMakeFiles/r2d2_arm.dir/build
 
-CMakeFiles/r2d2_arm.dir/requires: CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o.requires
+CMakeFiles/r2d2_arm.dir/requires: CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o.requires
 
 .PHONY : CMakeFiles/r2d2_arm.dir/requires
 

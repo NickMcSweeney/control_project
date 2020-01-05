@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cc.o"
+  "CMakeFiles/r2d2_arm.dir/r2d2_arm_plugin.cpp.o"
   "libr2d2_arm.pdb"
   "libr2d2_arm.so"
 )
