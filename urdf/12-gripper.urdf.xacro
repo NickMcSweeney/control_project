@@ -280,6 +280,7 @@
       <!--<robotNamespace>/</robotNamespace>-->
     <!--</plugin>-->
   	<plugin name="r2d2_arm" filename="libr2d2_arm.so"/>
+  	<plugin name="r2d2_gripper" filename="libr2d2_gripper.so"/>
   </gazebo>
 
 </robot>

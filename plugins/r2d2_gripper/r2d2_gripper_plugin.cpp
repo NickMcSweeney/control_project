@@ -29,9 +29,10 @@ public:
     // Listen to the update event. This event is broadcast every
     // simulation iteration.
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-        std::bind(&R2D2ArmPlugin::OnUpdate, this));
+        std::bind(&R2D2GripperPlugin::OnUpdate, this));
 
-    this->joint_gripper_ = this->robot_->GetJoint("gripper_extension");
+    this->joint_right_gripper_ = this->robot_->GetJoint("right_gripper_joint");
+    this->joint_left_gripper_ = this->robot_->GetJoint("left_gripper_joint");
 
     if (!_sdf->HasElement("update_rate")) {
       // if parameter tag does NOT exist default to 0
@@ -57,22 +58,22 @@ public:
     // Create a named topic, and subscribe to it.
     ros::SubscribeOptions so =
         ros::SubscribeOptions::create<geometry_msgs::Point>(
-            "/set_gripper_pos", 1,
-            boost::bind(&R2D2ArmPlugin::cmdPosCallback, this, _1),
+            "/gripper/set_pos", 1,
+            boost::bind(&R2D2GripperPlugin::cmdPosCallback, this, _1),
             ros::VoidPtr(), &this->rosQueue);
     this->rosSub = this->rosNode->subscribe(so);
 
     // Create a named topic, and subscribe to it.
     ros::SubscribeOptions so_pid =
         ros::SubscribeOptions::create<std_msgs::Float32MultiArray>(
-            "/set_pid", 1,
-            boost::bind(&R2D2ArmPlugin::cmdPIDCallback, this, _1),
+            "/gripper/set_pid", 1,
+            boost::bind(&R2D2GripperPlugin::cmdPIDCallback, this, _1),
             ros::VoidPtr(), &this->rosQueue);
     this->rosSub_pid = this->rosNode->subscribe(so_pid);
 
     // Spin up the queue helper thread.
     this->rosQueueThread =
-        std::thread(std::bind(&R2D2ArmPlugin::QueueThread, this));
+        std::thread(std::bind(&R2D2GripperPlugin::QueueThread, this));
 
     if (this->update_rate_ > 0.0)
       this->update_period_ = 1.0 / this->update_rate_;
@@ -81,7 +82,7 @@ public:
 
     this->last_actuator_update_ = this->robot_->GetWorld()->SimTime();
     this->joint_state_publisher_ =
-        this->rosNode->advertise<sensor_msgs::JointState>("/gripper_joint_state",
+        this->rosNode->advertise<sensor_msgs::JointState>("/gripper/joint_state",
                                                           1000);
 
     if (!this->pid_controller_set) {
@@ -101,7 +102,8 @@ private:
   // publisher for the r2d2 gripper joint state
   void publishJointState() {
     std::vector<physics::JointPtr> joints;
-    joints.push_back(this->joint_gripper_);
+    joints.push_back(this->joint_left_gripper_);
+    joints.push_back(this->joint_right_gripper_);
 
     ros::Time current_time = ros::Time::now();
     this->joint_state_.header.stamp = current_time;
@@ -114,6 +116,11 @@ private:
     this->joint_state_.position[0] = joints[0]->Position(0);
     this->joint_state_.velocity[0] = joints[0]->GetVelocity(0);
     this->joint_state_.effort[0] = joints[0]->GetForce(0);
+
+    this->joint_state_.name[1] = joints[1]->GetName();
+    this->joint_state_.position[1] = joints[1]->Position(0);
+    this->joint_state_.velocity[1] = joints[1]->GetVelocity(0);
+    this->joint_state_.effort[1] = joints[1]->GetForce(0);
 
     this->joint_state_publisher_.publish(this->joint_state_);
   }
@@ -145,23 +152,23 @@ private:
     this->pos_cmd_ = pos;
   }
 
-  void UpdateArmEncoder() {
+  void UpdateGripperEncoder() {
     this->step_time_ =
         (this->robot_->GetWorld()->SimTime() - this->last_encoder_update_)
             .Double();
     this->last_encoder_update_ = this->robot_->GetWorld()->SimTime();
 
     this->gripper_encoder_vel_ =
-        (this->gripper_encoder_pos_ - this->joint_gripper_->Position(0)) /
+        (this->gripper_encoder_pos_ - this->joint_left_gripper_->Position(0)) /
         this->step_time_;
-    this->gripper_encoder_pos_ = this->joint_gripper_->Position(0);
+    this->gripper_encoder_pos_ = this->joint_left_gripper_->Position(0);
   }
 
   // Called by the world update start event
 public:
   void OnUpdate() {
 
-    this->UpdateArmEncoder();
+    this->UpdateGripperEncoder();
     
     common::Time current_time = this->robot_->GetWorld()->SimTime();
     double seconds_since_last_update =
@@ -172,7 +179,8 @@ public:
 
       // run the controller
       double target_pos = this->pos_cmd_;
-      this->gripper_position_controller_.update(this->joint_gripper_, target_pos, seconds_since_last_update);
+      this->gripper_position_controller_.update(this->joint_left_gripper_, target_pos, seconds_since_last_update);
+      this->gripper_position_controller_.update(this->joint_right_gripper_, target_pos, seconds_since_last_update);
 
       // update actuator update period.
       this->last_actuator_update_ += common::Time(this->update_period_);
@@ -184,7 +192,8 @@ private:
   PIDController gripper_position_controller_;
 
   physics::ModelPtr robot_;
-  physics::JointPtr joint_gripper_;
+  physics::JointPtr joint_left_gripper_;
+  physics::JointPtr joint_right_gripper_;
   ros::Publisher joint_state_publisher_;
   sensor_msgs::JointState joint_state_;
   std::unique_ptr<ros::NodeHandle> rosNode;
