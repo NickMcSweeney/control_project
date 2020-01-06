@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
-<robot name="r2d2" xmlns:xacro="http://ros.org/wiki/xacro">
-  <!--<plugin name="r2d2_arm" filename="libr2d2_arm.so"/>-->
-  <!--<plugin name="r2d2_gripper" filename="libr2d2_gripper.so"/>-->
-  
+<robot name="roscontrol" xmlns:xacro="http://ros.org/wiki/xacro">
+
   <xacro:property name="width" value="0.2" />
   <xacro:property name="leglen" value="0.6" />
   <xacro:property name="polelen" value="0.2" />
@@ -69,6 +67,28 @@
       <child link="${prefix}_${suffix}_wheel"/>
       <origin xyz="${baselen*reflect/3} 0 -${wheeldiam/2+.05}" rpy="0 0 0"/>
     </joint>
+
+    <!-- This block provides the simulator (Gazebo) with information on a few additional
+    physical properties. See http://gazebosim.org/tutorials/?tut=ros_urdf for more-->
+    <gazebo reference="${prefix}_${suffix}_wheel">
+      <mu1 value="200.0"/>
+      <mu2 value="100.0"/>
+      <kp value="10000000.0" />
+      <kd value="1.0" />
+      <material>Gazebo/Grey</material>
+    </gazebo>
+
+    <!-- This block connects the wheel joint to an actuator (motor), which informs both
+    simulation and visualization of the robot -->
+    <transmission name="${prefix}_${suffix}_wheel_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <actuator name="${prefix}_${suffix}_wheel_motor">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+      <joint name="${prefix}_${suffix}_wheel_joint">
+        <hardwareInterface>VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>
 
   </xacro:macro>
 
@@ -147,15 +167,15 @@
     <xacro:default_inertial mass="0.05"/>
   </link>
 
-  <transmission name="gripper_extension_trans" type="SimpleTransmission">
-    <type>transmission_interface/SimpleTransmission</type>
-    <actuator name="gripper_extension_motor">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-    <joint name="gripper_extension">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
-    </joint>
-  </transmission>
+  <!--<transmission name="gripper_extension_trans">-->
+    <!--<type>transmission_interface/SimpleTransmission</type>-->
+    <!--<actuator name="gripper_extension_motor">-->
+      <!--<mechanicalReduction>1</mechanicalReduction>-->
+    <!--</actuator>-->
+    <!--<joint name="gripper_extension">-->
+      <!--<hardwareInterface>PositionJointInterface</hardwareInterface>-->
+    <!--</joint>-->
+  <!--</transmission>-->
 
   <xacro:macro name="gripper" params="prefix reflect">
     <joint name="${prefix}_gripper_joint" type="revolute">
@@ -182,16 +202,15 @@
       </collision>
       <xacro:default_inertial mass="0.05"/>
     </link>
-    <transmission name="${prefix}_gripper_trans" type="SimpleTransmission">
-      <type>transmission_interface/SimpleTransmission</type>
-      <actuator name="${prefix}_gripper_motor">
-        <mechanicalReduction>1</mechanicalReduction>
-        <!--<hardwareInterface>hardwareInterface/VelocityJointInterface</hardwareInterface>-->
-      </actuator>
-      <joint name="${prefix}_gripper_joint">
-        <hardwareInterface>PositionJointInterface</hardwareInterface>
-      </joint>
-    </transmission>
+    <!--<transmission name="${prefix}_gripper_trans">-->
+      <!--<type>transmission_interface/SimpleTransmission</type>-->
+      <!--<actuator name="${prefix}_gripper_motor">-->
+        <!--<mechanicalReduction>1</mechanicalReduction>-->
+      <!--</actuator>-->
+      <!--<joint name="${prefix}_gripper_joint">-->
+        <!--<hardwareInterface>PositionJointInterface</hardwareInterface>-->
+      <!--</joint>-->
+    <!--</transmission>-->
 
     <joint name="${prefix}_tip_joint" type="fixed">
       <parent link="${prefix}_gripper"/>
@@ -277,11 +296,16 @@
 
   <!-- Gazebo plugin for ROS Control -->
   <gazebo>
-    <!--<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">-->
-      <!--<robotNamespace>/</robotNamespace>-->
-    <!--</plugin>-->
-    <plugin name="r2d2_arm" filename="libr2d2_arm.so"/>
-    <plugin name="r2d2_gripper" filename="libr2d2_gripper.so"/>
+    <plugin name="r2d2_arm" filename="libr2d2_arm.so">
+      <robotNamespace>/arm/</robotNamespace>
+    </plugin>
+    <plugin name="r2d2_gripper" filename="libr2d2_gripper.so">
+      <robotNamespace>/gripper/</robotNamespace>
+    </plugin>
+
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/</robotNamespace>
+    </plugin>
   </gazebo>
 
 </robot>

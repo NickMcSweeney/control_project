@@ -5,7 +5,7 @@ class PIDController {
   double pid_p_;
   double pid_i_;
   double pid_d_;
-  double Int_e_;
+  double Int_e_ [60];
   double last_e_;
 
   double max_c_;
@@ -14,12 +14,14 @@ class PIDController {
   double *pos_;
 
   double PID(double e, double dt) {
-    double de = (this->last_e_ - e) / dt;
-    this->Int_e_ += e * dt;
+
+    double de = (e - this->last_e_) / dt;
+    double ie = this->updateI(e, dt);
+    
     this->last_e_ = e;
 
     double c =
-        e * this->pid_p_ + this->Int_e_ * this->pid_i_ + de * this->pid_d_;
+        e * this->pid_p_ + ie * this->pid_i_ + de * this->pid_d_;
 
     // Clamp c values (velocity)
     if (c > this->max_c_)
@@ -42,7 +44,7 @@ public:
     this->pid_i_ = ki;
     this->pid_d_ = kd;
 
-    this->Int_e_ = 0;
+    //this->Int_e_ = {0};
     this->last_e_ = 0;
 
     this->pos_ = pos;
@@ -53,13 +55,25 @@ public:
     double error = u - *this->pos_;
 
     double control = this->PID(error, dt);
-    joint->SetVelocity(0, control);
-    // this->joint_arm_->SetForce(0, control);
+    //joint->SetVelocity(0, control);
+    joint->SetForce(0, control);
   }
 
   void setK(double kp, double ki, double kd) {
     this->pid_p_ = kp;
     this->pid_i_ = ki;
     this->pid_d_ = kd;
+  }
+
+  double updateI(double new_e, double dt) {
+    double sum = new_e;
+    int len = ((sizeof this->Int_e_) / (sizeof *this->Int_e_));
+    for(int i = 0;i<(len-1);i++) {
+      this->Int_e_[i] = this->Int_e_[i+1];
+      sum += this->Int_e_[i];
+    }
+    this->Int_e_[len-1] = new_e;
+
+    return sum*dt;
   }
 };

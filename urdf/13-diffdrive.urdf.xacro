@@ -296,9 +296,16 @@
 
   <!-- Gazebo plugin for ROS Control -->
   <gazebo>
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-      <robotNamespace>/</robotNamespace>
+    <plugin name="r2d2_arm" filename="libr2d2_arm.so">
+      <robotNamespace>/arm/</robotNamespace>
     </plugin>
+    <plugin name="r2d2_gripper" filename="libr2d2_gripper.so">
+      <robotNamespace>/gripper/</robotNamespace>
+    </plugin>
+
+    <!--<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">-->
+      <!--<robotNamespace>/</robotNamespace>-->
+    <!--</plugin>-->
   </gazebo>
 
 </robot>

@@ -55,13 +55,20 @@ public:
     // Create our ROS node. This acts in a similar manner to the Gazebo node
     this->rosNode.reset(new ros::NodeHandle("gazebo_client"));
 
-    // Create a named topic, and subscribe to it.
-    ros::SubscribeOptions so =
+    // Create a set position topic, and subscribe to it.
+    ros::SubscribeOptions so_pos =
         ros::SubscribeOptions::create<geometry_msgs::Point>(
             "/gripper/set_pos", 1,
             boost::bind(&R2D2GripperPlugin::cmdPosCallback, this, _1),
             ros::VoidPtr(), &this->rosQueue);
-    this->rosSub = this->rosNode->subscribe(so);
+    this->rosSub_pos = this->rosNode->subscribe(so_pos);
+    // Create a set force topic, and subscribe to it.
+    ros::SubscribeOptions so_force =
+        ros::SubscribeOptions::create<std_msgs::Float32>(
+            "/gripper/set_force", 1,
+            boost::bind(&R2D2GripperPlugin::cmdForceCallback, this, _1),
+            ros::VoidPtr(), &this->rosQueue);
+    this->rosSub_force = this->rosNode->subscribe(so_force);
 
     // Create a named topic, and subscribe to it.
     ros::SubscribeOptions so_pid =
@@ -88,11 +95,14 @@ public:
     if (!this->pid_controller_set) {
       // setup pid controller
 
-      this->gripper_position_controller_.init(&this->gripper_encoder_pos_, 1.2, 0.025, 13, 0.00002, 1.8);
+      this->left_gripper_position_controller_.init(&this->left_gripper_encoder_pos_, 100, 0.025, 5.248, 0.00000625, 2.1);
+      this->right_gripper_position_controller_.init(&this->right_gripper_encoder_pos_, 100, 0.025, 5.248, 0.00000625, 2.1);
       this->pos_cmd_ = 0;
 
-      this->gripper_encoder_pos_ = 0;
-      this->gripper_encoder_vel_ = 0;
+      this->left_gripper_encoder_pos_ = 0;
+      this->left_gripper_encoder_vel_ = 0;
+      this->right_gripper_encoder_pos_ = 0;
+      this->right_gripper_encoder_vel_ = 0;
 
       this->pid_controller_set = true;
     }
@@ -137,19 +147,24 @@ private:
   void cmdPIDCallback(const std_msgs::Float32MultiArray::ConstPtr &cmd_msg) {
     if (cmd_msg->data.size() != 3)
       return;
-    this->gripper_position_controller_.setK(cmd_msg->data[0], cmd_msg->data[1], cmd_msg->data[2]);
+    this->left_gripper_position_controller_.setK(cmd_msg->data[0], cmd_msg->data[1], cmd_msg->data[2]);
+    this->right_gripper_position_controller_.setK(cmd_msg->data[0], cmd_msg->data[1], cmd_msg->data[2]);
   }
 
   void cmdPosCallback(const geometry_msgs::Point::ConstPtr &cmd_msg) {
-    // Configure so that the position can be any value between 0 (fully retracted) and 0.375 (fully extended).
+    this->force_controller_active = false;
     double pos = cmd_msg->x;
 
     if (pos < 0) pos = 0;
-    pos = pos - 0.378;
-
-    if (pos > -0.002) pos = -0.002;
+    else if (pos > 0.5) pos = 0.5;
     
     this->pos_cmd_ = pos;
+  }
+
+  void cmdForceCallback(const std_msgs::Float32::ConstPtr &cmd_msg) {
+    this->force_controller_active = true;
+    double set_point = cmd_msg->data;
+    this->force_cmd_ = set_point;
   }
 
   void UpdateGripperEncoder() {
@@ -158,10 +173,16 @@ private:
             .Double();
     this->last_encoder_update_ = this->robot_->GetWorld()->SimTime();
 
-    this->gripper_encoder_vel_ =
-        (this->gripper_encoder_pos_ - this->joint_left_gripper_->Position(0)) /
+    this->left_gripper_encoder_vel_ =
+        (this->left_gripper_encoder_pos_ - this->joint_left_gripper_->Position(0)) /
         this->step_time_;
-    this->gripper_encoder_pos_ = this->joint_left_gripper_->Position(0);
+    this->left_gripper_encoder_pos_ = this->joint_left_gripper_->Position(0);
+    this->left_gripper_encoder_force_ = this->joint_left_gripper_->GetForce(0);
+    this->right_gripper_encoder_vel_ =
+        (this->right_gripper_encoder_pos_ - this->joint_right_gripper_->Position(0)) /
+        this->step_time_;
+    this->right_gripper_encoder_pos_ = this->joint_right_gripper_->Position(0);
+    this->right_gripper_encoder_force_ = this->joint_right_gripper_->GetForce(0);
   }
 
   // Called by the world update start event
@@ -179,8 +200,14 @@ public:
 
       // run the controller
       double target_pos = this->pos_cmd_;
-      this->gripper_position_controller_.update(this->joint_left_gripper_, target_pos, seconds_since_last_update);
-      this->gripper_position_controller_.update(this->joint_right_gripper_, target_pos, seconds_since_last_update);
+      double target_force = this->force_cmd_;
+      if(this->force_controller_active) {
+        this->left_gripper_force_controller_.update(this->joint_left_gripper_, target_force, seconds_since_last_update);
+        this->right_gripper_force_controller_.update(this->joint_right_gripper_, target_force, seconds_since_last_update);
+      } else {
+        this->left_gripper_position_controller_.update(this->joint_left_gripper_, target_pos, seconds_since_last_update);
+        this->right_gripper_position_controller_.update(this->joint_right_gripper_, target_pos, seconds_since_last_update);
+      }
 
       // update actuator update period.
       this->last_actuator_update_ += common::Time(this->update_period_);
@@ -189,16 +216,24 @@ public:
 
 private:
   bool pid_controller_set = false;
-  PIDController gripper_position_controller_;
+  bool force_controller_active = false;
+
+  PIDController left_gripper_position_controller_;
+  PIDController right_gripper_position_controller_;
+  PIDController left_gripper_force_controller_;
+  PIDController right_gripper_force_controller_;
 
   physics::ModelPtr robot_;
   physics::JointPtr joint_left_gripper_;
   physics::JointPtr joint_right_gripper_;
+
   ros::Publisher joint_state_publisher_;
   sensor_msgs::JointState joint_state_;
-  std::unique_ptr<ros::NodeHandle> rosNode;
-  ros::Subscriber rosSub;
+  ros::Subscriber rosSub_pos;
+  ros::Subscriber rosSub_force;
   ros::Subscriber rosSub_pid;
+  
+  std::unique_ptr<ros::NodeHandle> rosNode;
   ros::CallbackQueue rosQueue;
   std::thread rosQueueThread;
 
@@ -208,10 +243,14 @@ private:
   double update_rate_;
   double update_period_;
 
-  double gripper_encoder_pos_;
-  double gripper_encoder_vel_;
+  double left_gripper_encoder_pos_;
+  double left_gripper_encoder_vel_;
+  double left_gripper_encoder_force_;
+  double right_gripper_encoder_pos_;
+  double right_gripper_encoder_vel_;
+  double right_gripper_encoder_force_;
   double pos_cmd_;
-
+  double force_cmd_;
 private:
   event::ConnectionPtr updateConnection;
 };

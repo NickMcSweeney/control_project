@@ -40,8 +40,13 @@ There is a functional simulation *R2D2* robot that has a gripper on an arm that 
 
 Currently I am working on an assumtion that the ros topic `\joint_states` give the motor **truth** position value, and the ros topic `/r2d2_gripper_controller/command` is used to set how far the *motor* controlling the gripper rotates.
 
-- [  ] determine where the controller fits into the simulation.
+- [x] determine where the controller fits into the simulation.
 - [  ] construct a controller that can close and open gripper using a PID.
+  - [  ] establish an encoder for odometry calcualtions for the gripper.
 - [  ] add a force sensor to the gripper.
 - [  ] using the force sensor and a set *lifting force* close the gripper until a set force is reached
 - [  ] update the gripper controller to account for force readings when determining the speed that the controller closes.
+
+
+## Notes on force vs velocity control
+based on stackoverflow comments, force based control appears to be a better method of operating joints in gazebo as setting velocity apparently can have unintended side effects that break the physics simulations in the world.
