@@ -3,11 +3,9 @@
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
 
-#include "std_msgs/Float32.h"
-#include "std_msgs/Float32MultiArray.h"
-
 #include <geometry_msgs/Point.h>
-#include <sensor_msgs/JointState.h>
+#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Vector3.h>
 
 #include <functional>
 
@@ -84,9 +82,9 @@ private:
     geometry_msgs::Vector3 effort;
 
     ros::Time current_time = ros::Time::now();
-    pos.header.stamp = current_time;
-    vel.header.stamp = current_time;
-    effort.header.stamp = current_time;
+    //pos.header.stamp = current_time;
+    //vel.header.stamp = current_time;
+    //effort.header.stamp = current_time;
 
     // Set position
     pos.x = this->pos_[0];
@@ -125,7 +123,7 @@ private:
             .Double();
     this->last_encoder_update_ = this->object_->GetWorld()->SimTime();
     // set current state;
-    double pos[3] = {this->object_link_->WorldPose()->X(), this->object_link_->WorldPose()->Y(), this->object_link_->WorldPose()->Z()}
+    double pos[3] = {this->object_link_->WorldPose().Pos().X(), this->object_link_->WorldPose().Pos().Y(), this->object_link_->WorldPose().Pos().Z()};
 
     // establish velocity
     this->vel_[0] = (this->pos_[0] - pos[0])/this->step_time_;
