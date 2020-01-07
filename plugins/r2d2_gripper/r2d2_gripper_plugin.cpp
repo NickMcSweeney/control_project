@@ -95,9 +95,13 @@ public:
     if (!this->pid_controller_set) {
       // setup pid controller
 
-      this->left_gripper_position_controller_.init(&this->left_gripper_encoder_pos_, 100, 0.025, 5.248, 0.00000625, 2.1);
-      this->right_gripper_position_controller_.init(&this->right_gripper_encoder_pos_, 100, 0.025, 5.248, 0.00000625, 2.1);
+      this->left_gripper_position_controller_.init(&this->left_gripper_encoder_pos_, 30, 0.005, 5.248, 0.00000625, 2.1);
+      this->right_gripper_position_controller_.init(&this->right_gripper_encoder_pos_, 30, 0.005, 5.248, 0.00000625, 2.1);
       this->pos_cmd_ = 0;
+
+      this->left_gripper_force_controller_.init(&this->left_gripper_encoder_force_, 10, 0.005, 1, 0, 0);
+      this->right_gripper_force_controller_.init(&this->right_gripper_encoder_force_, 10, 0.005, 1, 0, 0);
+      this->force_cmd_ = 0;
 
       this->left_gripper_encoder_pos_ = 0;
       this->left_gripper_encoder_vel_ = 0;
@@ -147,8 +151,8 @@ private:
   void cmdPIDCallback(const std_msgs::Float32MultiArray::ConstPtr &cmd_msg) {
     if (cmd_msg->data.size() != 3)
       return;
-    this->left_gripper_position_controller_.setK(cmd_msg->data[0], cmd_msg->data[1], cmd_msg->data[2]);
-    this->right_gripper_position_controller_.setK(cmd_msg->data[0], cmd_msg->data[1], cmd_msg->data[2]);
+    this->left_gripper_force_controller_.setK(cmd_msg->data[0], cmd_msg->data[1], cmd_msg->data[2]);
+    this->right_gripper_force_controller_.setK(cmd_msg->data[0], cmd_msg->data[1], cmd_msg->data[2]);
   }
 
   void cmdPosCallback(const geometry_msgs::Point::ConstPtr &cmd_msg) {
