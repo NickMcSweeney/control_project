@@ -17,4 +17,7 @@ list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
 add_library(pid_controller SHARED src/pid_controller.cpp)
 target_link_libraries(pid_controller ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 
+add_library(r2d2_controller SHARED src/r2d2_controller.cpp)
+target_link_libraries(r2d2_controller ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
