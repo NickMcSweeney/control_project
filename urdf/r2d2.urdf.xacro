@@ -302,6 +302,9 @@
     <plugin name="r2d2_gripper" filename="libr2d2_gripper.so">
       <robotNamespace>/gripper/</robotNamespace>
     </plugin>
+    <!--<plugin name="r2d2_sudo_sensor" filename="libr2d2_sudo_sensor.so">-->
+      <!--<robotNamespace>/sudo_sensor/</robotNamespace>-->
+    <!--</plugin>-->
 
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/</robotNamespace>

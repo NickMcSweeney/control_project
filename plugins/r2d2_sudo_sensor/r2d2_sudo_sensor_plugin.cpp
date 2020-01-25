@@ -14,7 +14,7 @@
 #include <gazebo/physics/physics.hh>
 #include <ignition/math/Vector3.hh>
 
-//#include "pid_controller.h"
+#include "pid_controller.h"
 
 namespace gazebo {
 
@@ -30,7 +30,6 @@ public:
         std::bind(&R2D2SudoSensorPlugin::OnUpdate, this));
 
     this->object_link_ = this->object_->GetLink("phone_body");
-
 
     if (!_sdf->HasElement("update_rate")) {
       // if parameter tag does NOT exist default to 0
@@ -69,9 +68,7 @@ public:
     this->object_vel_publisher_ =
         this->rosNode->advertise<geometry_msgs::Twist>("/sudo_sensor/vel",
                                                           1000);
-    this->object_effort_publisher_ =
-        this->rosNode->advertise<geometry_msgs::Vector3>("/sudo_sensor/effort",
-                                                          1000);
+    this->object_effort_publisher_ = this->rosNode->advertise<geometry_msgs::Vector3>("/sudo_sensor/effort", 1000);
   }
 
 private:
@@ -97,9 +94,9 @@ private:
     vel.linear.z = this->vel_[2];
 
     // Set force
-    effort.x = this->force_[0];
-    effort.y = this->force_[1];
-    effort.z = this->force_[2];
+    effort.vector.x = this->force_[0];
+    effort.vector.y = this->force_[1];
+    effort.vector.z = this->force_[2];
 
     // Publish state
     this->object_pos_publisher_.publish(pos);
@@ -129,15 +126,24 @@ private:
     this->vel_[0] = (this->pos_[0] - pos[0])/this->step_time_;
     this->vel_[1] = (this->pos_[1] - pos[1])/this->step_time_;
     this->vel_[2] = (this->pos_[2] - pos[2])/this->step_time_;
+    //this->vel_[0] = 0;
+    //this->vel_[1] = 0;
+    //this->vel_[2] = 0;
 
     // establish position.
     this->pos_[0] = pos[0];
     this->pos_[1] = pos[1];
     this->pos_[2] = pos[2];
+    //this->pos_[0] = 0;
+    //this->pos_[1] = 0;
+    //this->pos_[2] = 0;
 
     // TODO: determine what effort values are to be published.
     // external force - force applied to object?
     // world frame - relative frame
+    this->force_[0] = 0.01;
+    this->force_[1] = 0.01;
+    this->force_[2] = 0.0;
   }
 
   // Called by the world update start event
