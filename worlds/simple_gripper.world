@@ -200,9 +200,9 @@
       <static>0</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.3 0 0.64 0 -0 0</pose>
-      <plugin name="r2d2_sudo_sensor"
-      filename="libr2d2_sudo_sensor.so">
-        <robotNamespace>/sudo_sensor/</robotNamespace>
+      <plugin name="r2_sensor"
+      filename="libr2_sensor.so">
+        <robotNamespace>/psudo_sensor/</robotNamespace>
       </plugin>
     </model>
   </world>
