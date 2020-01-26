@@ -3,8 +3,7 @@
 
 #### Running:
 to run the gazebo simulation `roslaunch r2d2 r2d2.launch`
-to run the cpp controller `rosrun r2d2 gripper_controller`
-there is an rviz instance `rviz/r2d2.rviz` that will allow direct calls to the controllers. 
+to run the ros automated control implementation `rosrun r2_robot r2_robot_node`
 
 #### Goal:
 + grip an object without dropping it
@@ -41,9 +40,9 @@ There is a functional simulation *R2D2* robot that has a gripper on an arm that 
 Currently I am working on an assumtion that the ros topic `\joint_states` give the motor **truth** position value, and the ros topic `/r2d2_gripper_controller/command` is used to set how far the *motor* controlling the gripper rotates.
 
 - [x] determine where the controller fits into the simulation.
-- [  ] construct a controller that can close and open gripper using a PID.
-  - [  ] establish an encoder for odometry calcualtions for the gripper.
-- [  ] add a force sensor to the gripper.
+- [x] construct a controller that can close and open gripper using a PID.
+  - [x] establish an encoder for odometry calcualtions for the gripper.
+- [x] add a force sensor to the gripper.
 - [  ] using the force sensor and a set *lifting force* close the gripper until a set force is reached
 - [  ] update the gripper controller to account for force readings when determining the speed that the controller closes.
 

@@ -75,7 +75,7 @@ public:
 		return false;
 	}
 	bool at_obj() {
-		if (this->sensor_position_ - this->position_ < 0.4)
+		if (this->sensor_position_ - this->position_ < 0.5)
 			return true;
 		return false;
 	}
@@ -121,7 +121,8 @@ class R2Controller {
 		this->robot_state_.update_sensor_f(msg->y);
 	}
 	void sensorPosCallback(const geometry_msgs::Point::ConstPtr &msg) {
-		this->robot_state_.update_sensor(msg->z);
+		float pos = msg->x;
+		this->robot_state_.update_sensor(pos);
 	}
 
 	void setEffort(float val) {
@@ -162,9 +163,9 @@ public:
 				this->nh.subscribe("/gripper/joint_state", 1000, &R2Controller::gripperCallback, this);
 		this->arm_sub = this->nh.subscribe("/arm/joint_state", 1000, &R2Controller::armCallback, this);
 		this->sensor_pos_sub =
-				this->nh.subscribe("/sudo_sensor/pos", 1000, &R2Controller::sensorPosCallback, this);
+				this->nh.subscribe("/psudo_sensor/pos", 1000, &R2Controller::sensorPosCallback, this);
 		this->sensor_force_sub =
-				this->nh.subscribe("/sudo_sensor/effort", 1000, &R2Controller::sensorForceCallback, this);
+				this->nh.subscribe("/psudo_sensor/effort", 1000, &R2Controller::sensorForceCallback, this);
 		this->position_sub = this->nh.subscribe("/r2d2_diff_drive_controller/odom", 1000,
 																						&R2Controller::positionCallback, this);
 
@@ -190,8 +191,13 @@ public:
 		if (!this->robot_state_.at_obj()) {
 			this->setRobotVel(0.1);
 		} else {
+			ROS_INFO("At Object");
 			this->setRobotVel(0.0);
 		}
+	}
+	void reach_for_obj() {
+		if (this->robot_state_.at_obj())
+			this->setArmPosition(0);
 	}
 	void run() {
 		// the actual controller runs here
@@ -220,6 +226,7 @@ int main(int argc, char **argv) {
 
 		c.init();
 		c.go_to_obj();
+		c.reach_for_obj();
 		c.run();
 	}
 	return 0;
