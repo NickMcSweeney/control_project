@@ -51,8 +51,8 @@ public:
 		double error = u - *this->pos_;
 
 		double control = this->PID(error, dt);
-		// joint->SetVelocity(0, control);
-		joint->SetForce(0, control);
+		joint->SetVelocity(0, control);
+		// joint->SetForce(0, control);
 	}
 
 	void setK(double kp, double ki, double kd) {

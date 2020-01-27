@@ -134,6 +134,7 @@ include_directories(
 add_library(r2_arm plugins/r2_arm_plugin.cpp)
 add_library(r2_gripper plugins/r2_gripper_plugin.cpp)
 add_library(r2_sensor plugins/psudo_sensor_plugin.cpp)
+add_library(r2_touch plugins/touch_sensor_plugin.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -160,6 +161,7 @@ add_library(r2_sensor plugins/psudo_sensor_plugin.cpp)
  target_link_libraries(r2_arm ${catkin_LIBRARIES})
  target_link_libraries(r2_gripper ${catkin_LIBRARIES})
  target_link_libraries(r2_sensor ${catkin_LIBRARIES})
+ target_link_libraries(r2_touch ${catkin_LIBRARIES})
 
 #############
 ## Install ##

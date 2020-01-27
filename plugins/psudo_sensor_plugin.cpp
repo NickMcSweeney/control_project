@@ -135,9 +135,9 @@ private:
 		// TODO: determine what effort values are to be published.
 		// external force - force applied to object?
 		// world frame - relative frame
-		this->force_[0] = 0.01;
-		this->force_[1] = 0.01;
-		this->force_[2] = 0.0;
+		this->force_[0] = this->object_link_->WorldForce().X();
+		this->force_[1] = this->object_link_->WorldForce().Y();
+		this->force_[2] = this->object_link_->WorldForce().Z();
 	}
 
 	// Called by the world update start event

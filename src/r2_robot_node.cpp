@@ -37,7 +37,9 @@ class R2State {
 
 public:
 	float obj_slip_;
-	bool init;
+	PIDController force_control =
+			PIDController(&this->gripper_effort_, 0.96, 0.0005, 0.0005, 0.00001, 0.000001);
+	PIDController drive_control = PIDController(&this->position_, 1.0, 0.005, 0.26, 0.1, 0.07);
 
 	R2State() {
 		this->obj_slip_ = 0;
@@ -53,8 +55,6 @@ public:
 		this->gripper_effort_ = 0;
 
 		this->arm_position_ = 0;
-
-		this->init = false;
 	}
 	void update_position(float p, float v) {
 		this->position_ = p;
@@ -69,13 +69,27 @@ public:
 	void update_sensor_v(float v) { this->sensor_velocity_ = v; }
 	void update_sensor_f(float f) { this->sensor_force_ = f; }
 
+	float sensor_force() { return this->sensor_force_ > 0 ? this->sensor_force_ : 0; }
+	float object_pose() { return this->sensor_position_ - 0.46; }
+
 	bool retracted_open() {
-		if (this->arm_position_ <= -0.18 && this->gripper_position_ >= 0.36)
+		if (this->arm_position_ <= -0.18 && this->gripper_position_ >= 0.4)
+			return true;
+		return false;
+	}
+	bool extended_open() {
+		ROS_INFO("[pos arm] %f [pos grip] %f", this->arm_position_, this->gripper_position_);
+		if (this->arm_position_ >= -0.08 && this->gripper_position_ >= 0.3)
 			return true;
 		return false;
 	}
 	bool at_obj() {
-		if (this->sensor_position_ - this->position_ < 0.5)
+		if (this->sensor_position_ - this->position_ < 0.6)
+			return true;
+		return false;
+	}
+	bool at_home() {
+		if (this->position_ < 0.5)
 			return true;
 		return false;
 	}
@@ -100,6 +114,10 @@ class R2Controller {
 	R2State robot_state_ = R2State();
 	PIDController pid = PIDController(&this->robot_state_.obj_slip_, 10, 0.5, 0.5, 0, 0);
 
+	enum states { ready, initial, moving, target, gripping, home, finished };
+	states state_;
+	states next_;
+
 	void gripperCallback(const sensor_msgs::JointState::ConstPtr &msg) {
 		// set gripper state;
 		float pos = (float)(msg->position[0] + msg->position[1]) / 2;
@@ -118,7 +136,7 @@ class R2Controller {
 		float f_x = msg->x;
 		float f_y = msg->y;
 		float f_z = msg->z;
-		this->robot_state_.update_sensor_f(msg->y);
+		this->robot_state_.update_sensor_f(f_x + f_y);
 	}
 	void sensorPosCallback(const geometry_msgs::Point::ConstPtr &msg) {
 		float pos = msg->x;
@@ -174,33 +192,89 @@ public:
 		this->arm_pos_pub = this->nh.advertise<geometry_msgs::Point>("/arm/set_pos", 1000);
 		this->robot_pos_pub =
 				this->nh.advertise<geometry_msgs::Twist>("/r2d2_diff_drive_controller/cmd_vel", 1000);
+
+		state_ = ready;
+		next_ = initial;
+	}
+
+	void update_state(states new_next) {
+		this->state_ = this->next_;
+		this->next_ = new_next;
 	}
 
 	void init() {
 		// set retracted arm ang open gripper
-		if (!this->robot_state_.init) {
-			this->setArmPosition(-0.2);
-			this->setGripperPosition(0.4);
-			if (this->robot_state_.retracted_open()) {
-				ROS_INFO("Initialized!");
-				this->robot_state_.init = true;
-			}
+		this->setArmPosition(-0.36);
+		this->setGripperPosition(0.48);
+		if (this->robot_state_.retracted_open()) {
+			ROS_INFO("Initialized!");
+			this->update_state(target);
 		}
 	}
-	void go_to_obj() {
-		if (!this->robot_state_.at_obj()) {
-			this->setRobotVel(0.1);
-		} else {
-			ROS_INFO("At Object");
-			this->setRobotVel(0.0);
-		}
+	void go_to_obj(float dt) {
+		float c = this->robot_state_.drive_control.update(this->robot_state_.object_pose(), dt);
+		this->setRobotVel(c);
+		if (this->robot_state_.at_obj())
+			this->update_state(gripping);
 	}
 	void reach_for_obj() {
-		if (this->robot_state_.at_obj())
-			this->setArmPosition(0);
+		this->setArmPosition(0);
+		// this->setGripperPosition(0.32);
+		if (this->robot_state_.at_obj() & this->robot_state_.extended_open()) {
+			ROS_INFO("In position to grab object!");
+			this->update_state(home);
+		}
 	}
-	void run() {
+	void grab_object(float dt) {
+		// this is where using a controller happens...
+		ROS_INFO("the force on the object is: %f", this->robot_state_.sensor_force());
+		float c = this->robot_state_.force_control.update(30, dt);
+		c = c < 0 ? 0 : c;
+		this->setEffort(-c);
+		if (this->robot_state_.sensor_force() >= 10)
+			this->update_state(home);
+	}
+	void return_home(float dt) {
+		this->grab_object(dt);
+
+		float c = this->robot_state_.drive_control.update(0.5, dt);
+		if (c > 0)
+			c = 0;
+		this->setRobotVel(c);
+		if (this->robot_state_.at_home())
+			this->update_state(finished);
+	}
+	void run(float dt) {
 		// the actual controller runs here
+		switch (this->state_) {
+		case initial:
+			ROS_INFO("INITIAL");
+			this->init();
+			break;
+		case moving:
+			ROS_INFO("MOVING");
+			this->go_to_obj(dt);
+			break;
+		case target:
+			ROS_INFO("TARGET");
+			this->reach_for_obj();
+			break;
+		case gripping:
+			ROS_INFO("GRIPPING");
+			this->grab_object(dt);
+			break;
+		case home:
+			ROS_INFO("HOME");
+			this->return_home(dt);
+			break;
+		case ready:
+			ROS_INFO("READY");
+			this->update_state(moving);
+			break;
+		case finished:
+			ROS_INFO("FINISHED");
+			break;
+		}
 	}
 };
 
@@ -217,17 +291,22 @@ int main(int argc, char **argv) {
 	R2Controller c;
 
 	ROS_INFO("STARTING");
+	float current_time = ros::Time::now().toSec();
+	float last_time = ros::Time::now().toSec();
+	float delta_time = current_time - last_time;
 	// ROS main loop
 	ros::Rate loop_rate(10);
 	while (ros::ok()) {
-		// Check for incomming sensor messages
+		// update time
+		last_time = current_time;
+		current_time = ros::Time::now().toSec();
+		delta_time = current_time - last_time;
+
+		// run robot
+		c.run(delta_time);
+
 		ros::spinOnce();
 		loop_rate.sleep();
-
-		c.init();
-		c.go_to_obj();
-		c.reach_for_obj();
-		c.run();
 	}
 	return 0;
 }
