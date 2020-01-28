@@ -181,11 +181,6 @@
           <mesh filename="package://urdf_tutorial/meshes/l_finger.dae" />
         </geometry>
       </visual>
-      <!--<sensor name="${prefix}_finger_sensor" type="contact">-->
-      <!--<contact>-->
-      <!--<collision>${prefix}_finger_colision</collision>-->
-      <!--</contact>-->
-      <!--</sensor>-->
       <collision>
         <geometry>
           <mesh filename="package://urdf_tutorial/meshes/l_finger.dae" />
@@ -200,6 +195,16 @@
           </friction>
         </surface>
       </collision>
+      <!--<gazebo reference="left_gripper">-->
+      <!--<sensor name="gripper_contact_sensor" type="contact">-->
+      <!--<pose>0.0 0.0 0.0 0.0 0 0</pose>-->
+      <!--<visualize>false</visualize>-->
+      <!--<update_rate>5</update_rate>-->
+      <!--<contact>-->
+      <!--<collision name="${prefix}_finger" />-->
+      <!--</contact>-->
+      <!--</sensor>-->
+      <!--</gazebo>-->
       <xacro:default_inertial mass="0.05" />
     </link>
     <!--<transmission name="${prefix}_gripper_trans">-->
@@ -225,10 +230,11 @@
       </visual>
       <!--<sensor name="${prefix}_finger_tip_sensor" type="contact">-->
       <!--<contact>-->
-      <!--<collision>${prefix}_finger_tip_colision</collision>-->
+      <!--<collision>finger_tip_colision</collision>-->
       <!--</contact>-->
+      <!--<update_rate>5</update_rate>-->
       <!--</sensor>-->
-      <collision>
+      <collision name="finger_tip_colision">
         <geometry>
           <mesh filename="package://urdf_tutorial/meshes/l_finger_tip.dae" />
         </geometry>
@@ -309,12 +315,37 @@
     <plugin name="r2_gripper" filename="libr2_gripper.so">
       <robotNamespace>/gripper/</robotNamespace>
     </plugin>
-    <!--<plugin name="r2_touch" filename="libr2_touch.so">-->
-    <!--<robotNamespace>/touch/</robotNamespace>-->
-    <!--</plugin>-->
     <plugin name="gazebo_ros_control"
     filename="libgazebo_ros_control.so">
       <robotNamespace>/</robotNamespace>
     </plugin>
+  </gazebo>
+  <gazebo reference="left_gripper">
+    <sensor name="left_gripper_contact_sensor" type="contact">
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <update_rate>5</update_rate>
+      <contact>
+        <collision>collision</collision>
+      </contact>
+      <plugin name="r2_touch" filename="libr2_touch.so">
+        <robotNamespace>
+        /left_gripper_contact_sensor/</robotNamespace>
+      </plugin>
+    </sensor>
+  </gazebo>
+  <gazebo reference="right_gripper">
+    <sensor name="right_gripper_contact_sensor" type="contact">
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <update_rate>5</update_rate>
+      <contact>
+        <collision>collision</collision>
+      </contact>
+      <plugin name="r2_touch" filename="libr2_touch.so">
+        <robotNamespace>
+        /right_gripper_contact_sensor/</robotNamespace>
+      </plugin>
+    </sensor>
   </gazebo>
 </robot>

@@ -204,7 +204,7 @@
     <!--<robotNamespace>/psudo_sensor/</robotNamespace>-->
     <!--</plugin>-->
     <!--</model>-->
-    <model name='beer_small'>
+    <model name='object'>
       <link name='obj_body'>
         <pose frame=''>2.3 0 0.64 0 -0 0</pose>
         <inertial>
