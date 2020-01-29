@@ -35,10 +35,11 @@ class R2State {
 
 	float arm_position_;
 
+	float last_time_;
+
 public:
 	float obj_slip_;
-	PIDController force_control =
-			PIDController(&this->gripper_effort_, 0.96, 0.0005, 0.0005, 0.00001, 0.000001);
+	PIDController force_control = PIDController(&this->gripper_effort_, 1.5, 0.0005, 0.01, 0.0, 0.0);
 	PIDController drive_control = PIDController(&this->position_, 1.0, 0.005, 0.26, 0.1, 0.07);
 
 	R2State() {
@@ -55,7 +56,11 @@ public:
 		this->gripper_effort_ = 0;
 
 		this->arm_position_ = 0;
+
+		this->last_time_ = ros::Time::now().toSec();
 	}
+	float mass() { return 0.5; }
+	float acceleration() { return this->obj_slip_; }
 	void update_position(float p, float v) {
 		this->position_ = p;
 		this->velocity_ = v;
@@ -66,7 +71,12 @@ public:
 	}
 	void update_arm(float p) { this->arm_position_ = p; }
 	void update_sensor(float p) { this->sensor_position_ = p; }
-	void update_sensor_v(float v) { this->sensor_velocity_ = v; }
+	void update_sensor_v(float v) {
+		float dt = this->last_time_ - ros::Time::now().toSec();
+		this->last_time_ = ros::Time::now().toSec();
+		this->obj_slip_ = (this->sensor_velocity_ - v) / dt;
+		this->sensor_velocity_ = v;
+	}
 	void update_sensor_f(float f) { this->sensor_force_ = f; }
 
 	float sensor_force() { return this->sensor_force_ > 0 ? this->sensor_force_ : 0; }
@@ -228,10 +238,14 @@ public:
 	void grab_object(float dt) {
 		// this is where using a controller happens...
 		ROS_INFO("the force on the object is: %f", this->robot_state_.sensor_force());
-		float c = this->robot_state_.force_control.update(30, dt);
-		c = c < 0 ? 0 : c;
+		float force = this->robot_state_.mass() * (9.8 + this->robot_state_.acceleration()) / 2.0;
+		ROS_INFO("this target force is %f", force);
+		float c = this->robot_state_.force_control.update(force, dt);
+		// prevent a negative force on the object, and divide in half to account for the 2 sources of
+		// force
+		c = c < 0 ? 0 : c / 2;
 		this->setEffort(-c);
-		if (this->robot_state_.sensor_force() >= 10)
+		if (this->robot_state_.sensor_force() >= force)
 			this->update_state(home);
 	}
 	void return_home(float dt) {

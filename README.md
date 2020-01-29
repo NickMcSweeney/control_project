@@ -1,6 +1,9 @@
 # Control Project
 ### Simulation for a controller for a 2 'finger' gripper using gazebo and ros.
 
+## [Current State]
+with the adition of a calculated force value for the effort control mechanisim, the R2 robot will no longer be able to grab the target object. this is due to poor sensor input data and if/when the contact sensor is working the issue should imedeately resolve -- or at lest allow for pid tuning -- and then be resolved.
+
 #### Building:
 - `catkin_make` will build the 3 control plugins, the sensor plugin, and the ros application.
 - the location of the build files need to be included in the Gazebo Path for it to be able to run
@@ -42,6 +45,7 @@ this is a gazebo plugin that contains a pid actuator control of the r2 robot's a
 this is a gazebo plugin that contains a pid actuator control of the r2 robot's gripper, and publishes state information, and substrives to position commands from ros.
 ### plugins/pseudo_sensor_plugin
 this is a gazebo plugin that is intended to be attached to a target object to publish the objects state information, providing an approximation of the data avalable if an array of sensors were being used by the robot.
+Note: [it is likely world force will read zero if the gripper is inputing balanced levels of force on an object and therefore the force readings are useless.]
 ### plugins/touch_sensor_plugin
 this is a gazebo sensor plugin that is intended to publich contact sensor data. this sensor is attached to the gripper fingers. _This is only partially completed:_ currently does not publish data to ros.
 ### libs/pid_controller
